@@ -1,0 +1,38 @@
+--- Membuat Table Analisa 
+ CREATE TABLE Kimia_Farma.kf_analisis AS
+  SELECT
+  ft.transaction_id, 
+  ft.date, 
+  ft.branch_id,
+  ft.product_id, 
+  ft.customer_name,
+  ft.rating as rating_transaksi,
+  kc.branch_name,
+  kc.kota,
+  kc.provinsi,
+  kc.rating as rating_cabang,
+  pd.product_name,
+  pd.price as actual_price,
+  ft.discount_percentage,
+CASE
+  WHEN pd.price <= 50000 THEN 0.10
+  WHEN pd.price > 50000 - 100000 THEN 0.15
+  WHEN pd.price > 100000 - 300000 THEN 0.20
+  WHEN pd.price > 300000 - 500000 THEN 0.25
+  WHEN pd.price > 500000 THEN 0.30
+ELSE 0.30
+END AS presentase_gross_laba,
+(pd.price-(pd.price*ft.discount_percentage)) as nett_sales,
+(pd.price * CASE
+  WHEN pd.price <= 50000 THEN 0.10
+  WHEN pd.price > 50000 - 100000 THEN 0.15
+  WHEN pd.price > 100000 - 300000 THEN 0.20
+  WHEN pd.price > 300000 - 500000 THEN 0.25
+  WHEN pd.price > 500000 THEN 0.30
+ELSE 0.30 
+END) AS nett_profit,
+  FROM Kimia_Farma.kf_final_transaction as ft
+  LEFT JOIN Kimia_Farma.kf_kantor_cabang as kc
+  on ft.branch_id = kc.branch_id
+  LEFT JOIN Kimia_Farma.kf_product as pd 
+  on ft.product_id = pd.product_id;
